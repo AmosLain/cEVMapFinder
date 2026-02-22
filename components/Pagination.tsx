@@ -1,38 +1,42 @@
-interface PaginationProps {
-  page: number;
+type PaginationProps = {
+  currentPage: number;
   totalPages: number;
-  onPrev: () => void;
-  onNext: () => void;
-}
+  onPageChange: (page: number) => void;
+};
 
 export default function Pagination({
-  page,
+  currentPage,
   totalPages,
-  onPrev,
-  onNext,
+  onPageChange,
 }: PaginationProps) {
   if (totalPages <= 1) return null;
+
+  const canPrev = currentPage > 1;
+  const canNext = currentPage < totalPages;
 
   return (
     <div className="flex items-center justify-center gap-4 mt-8">
       <button
-        onClick={onPrev}
-        disabled={page <= 1}
-        className="px-4 py-2 bg-slate-700 hover:bg-slate-600 disabled:opacity-40 disabled:cursor-not-allowed text-white rounded-lg text-sm font-medium transition-colors"
+        type="button"
+        onClick={() => canPrev && onPageChange(currentPage - 1)}
+        disabled={!canPrev}
+        className="px-4 py-2 rounded-lg border border-gray-300 disabled:opacity-50"
       >
-        ← Prev
+        Prev
       </button>
 
-      <span className="text-slate-300 text-sm font-medium">
-        Page {page} / {totalPages}
-      </span>
+      <div className="text-sm text-gray-700">
+        Page <span className="font-semibold">{currentPage}</span> of{" "}
+        <span className="font-semibold">{totalPages}</span>
+      </div>
 
       <button
-        onClick={onNext}
-        disabled={page >= totalPages}
-        className="px-4 py-2 bg-slate-700 hover:bg-slate-600 disabled:opacity-40 disabled:cursor-not-allowed text-white rounded-lg text-sm font-medium transition-colors"
+        type="button"
+        onClick={() => canNext && onPageChange(currentPage + 1)}
+        disabled={!canNext}
+        className="px-4 py-2 rounded-lg border border-gray-300 disabled:opacity-50"
       >
-        Next →
+        Next
       </button>
     </div>
   );
