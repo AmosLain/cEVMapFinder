@@ -17,7 +17,7 @@ type GeoState = {
 
 export default function HomePage() {
   const [allStations, setAllStations] = useState<Station[]>([]);
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
   const [query, setQuery] = useState("");
@@ -26,178 +26,172 @@ export default function HomePage() {
 
   const [geo, setGeo] = useState<GeoState>(null);
   const [geoLoading, setGeoLoading] = useState(false);
-  const [geoStatus, setGeoStatus] = useState<string | null>(null);
+
+  // We reuse geoStatus as a general hint banner when not using geolocation
+  const [geoStatus, setGeoStatus] = useState<string | null>(
+    "Type a city/address (min 3 chars) to search worldwide, or click Find near me."
+  );
 
   const [page, setPage] = useState(1);
 
-  // פונקציה לטעינת תחנות — עם או בלי מיקום
-  const fetchStations = useCallback(
-    async (userLat?: number, userLng?: number) => {
-      setLoading(true);
-      setError(null);
+  // Load stations: either by coordinates (Near Me) or by text search (global)
+  const fetchStations = useCallback(async (opts?: { lat?: number; lng?: number; search?: string }) => {
+    setLoading(true);
+    setError(null);
 
-      const params = new URLSearchParams();
-      if (userLat != null && userLng != null) {
-        params.set("lat", String(userLat));
-        params.set("lng", String(userLng));
+    const params = new URLSearchParams();
+    if (opts?.lat != null && opts?.lng != null) {
+      params.set("lat", String(opts.lat));
+      params.set("lng", String(opts.lng));
+      params.set("distanceKm", "35");
+    } else if (opts?.search) {
+      params.set("search", opts.search);
+      params.set("distanceKm", "35");
+    }
+
+    const url = `/api/stations${params.size > 0 ? "?" + params.toString() : ""}`;
+
+    try {
+      const res = await fetch(url);
+      if (!res.ok) throw new Error(`Server error ${res.status}`);
+      const data = await res.json();
+
+      if (data?.error?.message) {
+        setAllStations([]);
+        setError(data.error.message);
+      } else {
+        setAllStations(Array.isArray(data?.stations) ? data.stations : []);
       }
+    } catch (err) {
+      const msg = err instanceof Error ? err.message : "Failed to load stations";
+      setAllStations([]);
+      setError(msg);
+    } finally {
+      setLoading(false);
+    }
+  }, []);
 
-      const url = `/api/stations${params.size > 0 ? "?" + params.toString() : ""}`;
-
-      try {
-        const res = await fetch(url);
-        if (!res.ok) throw new Error(`Server error ${res.status}`);
-        const data = await res.json();
-        if (data?.error?.message) {
-          setError(data.error.message);
-        } else {
-          setAllStations(
-            Array.isArray(data?.stations) ? data.stations : []
-          );
-        }
-      } catch (err) {
-        const msg =
-          err instanceof Error ? err.message : "Failed to load stations";
-        setError(msg);
-      } finally {
-        setLoading(false);
-      }
-    },
-    []
-  );
-
-  // טעינה ראשונה — ללא מיקום
-  useEffect(() => {
-    fetchStations();
-  }, [fetchStations]);
-
-  // Debounce חיפוש
+  // Debounce search input
   const handleQueryChange = useCallback((value: string) => {
     setQuery(value);
     if (debounceTimer.current) clearTimeout(debounceTimer.current);
     debounceTimer.current = setTimeout(() => {
       setDebouncedQuery(value);
       setPage(1);
-    }, 250);
+    }, 300);
   }, []);
 
+  // Global search mode: if no geo, use debounced query to fetch stations around that place
   useEffect(() => {
-    return () => {
-      if (debounceTimer.current) clearTimeout(debounceTimer.current);
-    };
-  }, []);
+    if (geo) return; // when we have geo, we do not refetch on every keystroke
 
-  // Find Near Me
+    const q = debouncedQuery.trim();
+    if (!q) {
+      setAllStations([]);
+      setError(null);
+      setGeoStatus("Type a city/address (min 3 chars) to search worldwide, or click Find near me.");
+      return;
+    }
+
+    if (q.length < 3) {
+      setAllStations([]);
+      setError(null);
+      setGeoStatus("Type at least 3 characters to search worldwide.");
+      return;
+    }
+
+    setGeoStatus(null);
+    fetchStations({ search: q });
+  }, [debouncedQuery, geo, fetchStations]);
+
+  // Find Near Me (browser geolocation)
   const handleFindNearMe = useCallback(() => {
-    if (!navigator?.geolocation) {
-      setGeoStatus("Geolocation is not supported by your browser.");
+    if (!navigator.geolocation) {
+      setGeoStatus("Geolocation is not supported by this browser");
       return;
     }
 
     setGeoLoading(true);
-    setGeoStatus(null);
+    setGeoStatus("Requesting location permission…");
 
     navigator.geolocation.getCurrentPosition(
-      (position) => {
-        const { latitude, longitude } = position.coords;
-        setGeo({ lat: latitude, lng: longitude });
+      (pos) => {
+        const lat = pos.coords.latitude;
+        const lng = pos.coords.longitude;
+        setGeo({ lat, lng });
+        setGeoStatus(null);
+        setGeoLoading(false);
         setPage(1);
-        setGeoLoading(false);
-        // שלח מחדש ל-API עם המיקום של המשתמש
-        fetchStations(latitude, longitude);
+        fetchStations({ lat, lng });
       },
-      (posError) => {
-        let msg = "Could not get your location.";
-        if (posError.code === posError.PERMISSION_DENIED) {
-          msg = "Location access denied. Please allow location in your browser.";
-        } else if (posError.code === posError.TIMEOUT) {
-          msg = "Location request timed out. Try again.";
-        }
-        setGeoStatus(msg);
+      (err) => {
+        setGeo(null);
         setGeoLoading(false);
+        setGeoStatus(err?.message || "Location permission denied");
       },
-      { timeout: 10000, maximumAge: 60000 }
+      { enableHighAccuracy: true, timeout: 8000 }
     );
   }, [fetchStations]);
 
-  // חישוב מרחקים + פילטור + מיון + pagination
-  const { filteredStations, totalPages } = useMemo(() => {
-    const q = debouncedQuery.toLowerCase().trim();
+  // Compute stations (filter + distance sort when geo is available)
+  const processedStations = useMemo(() => {
+    const q = query.trim().toLowerCase();
 
-    let list = allStations.map((s): Station => {
-      if (geo != null && s.lat != null && s.lng != null) {
-        return {
-          ...s,
-          distance: haversineKm(geo.lat, geo.lng, s.lat, s.lng),
-        };
-      }
-      return { ...s, distance: undefined };
+    const withDistance = allStations.map((s) => {
+      const dist =
+        geo && s.lat != null && s.lng != null
+          ? haversineKm(geo.lat, geo.lng, s.lat, s.lng)
+          : null;
+
+      return { ...s, distance: dist ?? undefined };
     });
 
-    if (q) {
-      list = list.filter(
-        (s) =>
-          s.name?.toLowerCase().includes(q) ||
-          s.address?.toLowerCase().includes(q) ||
-          s.city?.toLowerCase().includes(q) ||
-          s.power?.toLowerCase().includes(q) ||
-          s.network?.toLowerCase().includes(q)
-      );
-    }
+    const filtered =
+      q.length === 0
+        ? withDistance
+        : withDistance.filter((s) => {
+            const hay = `${s.name} ${s.address} ${s.city} ${s.country}`.toLowerCase();
+            return hay.includes(q);
+          });
 
-    if (geo != null) {
-      list.sort((a, b) => {
-        const da = a.distance ?? Infinity;
-        const db = b.distance ?? Infinity;
+    // sort by distance if geo
+    if (geo) {
+      filtered.sort((a, b) => {
+        const da = a.distance ?? Number.POSITIVE_INFINITY;
+        const db = b.distance ?? Number.POSITIVE_INFINITY;
         return da - db;
       });
     }
 
-    const pages = Math.max(1, Math.ceil(list.length / PAGE_SIZE));
-    return { filteredStations: list, totalPages: pages };
-  }, [allStations, debouncedQuery, geo]);
+    return filtered;
+  }, [allStations, geo, query]);
 
-  const currentPage = useMemo(
-    () =>
-      filteredStations.slice((page - 1) * PAGE_SIZE, page * PAGE_SIZE),
-    [filteredStations, page]
-  );
+  const total = processedStations.length;
+  const totalPages = Math.max(1, Math.ceil(total / PAGE_SIZE));
+  const currentPage = Math.min(page, totalPages);
 
-  const handlePrev = useCallback(
-    () => setPage((p) => Math.max(1, p - 1)),
-    []
-  );
-  const handleNext = useCallback(
-    () => setPage((p) => Math.min(totalPages, p + 1)),
-    [totalPages]
-  );
+  const pageStations = useMemo(() => {
+    const start = (currentPage - 1) * PAGE_SIZE;
+    return processedStations.slice(start, start + PAGE_SIZE);
+  }, [processedStations, currentPage]);
+
+  // If user changes filters and current page becomes invalid
+  useEffect(() => {
+    if (page > totalPages) setPage(1);
+  }, [page, totalPages]);
 
   return (
-    <div className="min-h-screen bg-slate-900 text-slate-100">
-      {/* Header */}
-      <header className="border-b border-slate-800 bg-slate-900/80 backdrop-blur sticky top-0 z-10">
-        <div className="max-w-6xl mx-auto px-4 py-4 flex items-center gap-3">
-          <span className="text-2xl">⚡</span>
-          <span className="text-xl font-bold text-white tracking-tight">
-            EVMapFinder
-          </span>
-        </div>
-      </header>
-
-      <main className="max-w-6xl mx-auto px-4 py-8 flex flex-col gap-6">
-        {/* Hero */}
-        <section className="text-center flex flex-col gap-2 pb-2">
-          <h1 className="text-3xl sm:text-4xl font-extrabold text-white">
-            Find EV Charging Stations
+    <main className="min-h-screen bg-slate-950 text-white">
+      <div className="max-w-5xl mx-auto px-4 py-10">
+        <header className="mb-8">
+          <h1 className="text-3xl sm:text-4xl font-bold tracking-tight">
+            cEVMapFinder
           </h1>
-          <p className="text-slate-400 text-base max-w-xl mx-auto">
-            Search thousands of charging points worldwide. Click{" "}
-            <span className="text-green-400 font-medium">Find near me</span>{" "}
-            to see stations closest to you.
+          <p className="text-slate-400 mt-2">
+            Global EV charging stations (search by place or use Near Me)
           </p>
-        </section>
+        </header>
 
-        {/* Search */}
         <SearchBar
           value={query}
           onChange={handleQueryChange}
@@ -205,62 +199,30 @@ export default function HomePage() {
           geoLoading={geoLoading}
         />
 
-        {/* Status */}
-        <StatusBar
-          loading={loading}
-          error={error}
-          total={filteredStations.length}
-          geoStatus={geoStatus}
-          hasLocation={geo != null}
-        />
+        <div className="mt-4">
+          <StatusBar
+            loading={loading}
+            error={error}
+            total={total}
+            geoStatus={geoStatus}
+            hasLocation={!!geo}
+          />
+        </div>
 
-        {/* Grid */}
-        {!loading && !error && (
-          <>
-            {currentPage.length === 0 ? (
-              <div className="flex flex-col items-center justify-center gap-4 py-20 text-slate-400">
-                <span className="text-5xl">🔍</span>
-                <p className="text-lg font-medium text-slate-300">
-                  No stations found
-                </p>
-                <p className="text-sm text-center max-w-xs">
-                  Try a different search term, or clear the search to see
-                  all stations.
-                </p>
-                {debouncedQuery && (
-                  <button
-                    onClick={() => {
-                      setQuery("");
-                      setDebouncedQuery("");
-                      setPage(1);
-                    }}
-                    className="mt-2 text-green-400 underline text-sm"
-                  >
-                    Clear search
-                  </button>
-                )}
-              </div>
-            ) : (
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
-                {currentPage.map((station) => (
-                  <StationCard key={station.id} station={station} />
-                ))}
-              </div>
-            )}
+        <section className="mt-6 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+          {pageStations.map((s) => (
+            <StationCard key={s.id} station={s} />
+          ))}
+        </section>
 
-            <Pagination
-              page={page}
-              totalPages={totalPages}
-              onPrev={handlePrev}
-              onNext={handleNext}
-            />
-          </>
-        )}
-      </main>
-
-      <footer className="border-t border-slate-800 mt-12 py-6 text-center text-slate-500 text-sm">
-        <p>EVMapFinder — Helping drivers find charge, everywhere.</p>
-      </footer>
-    </div>
+        <div className="mt-8">
+          <Pagination
+            currentPage={currentPage}
+            totalPages={totalPages}
+            onPageChange={setPage}
+          />
+        </div>
+      </div>
+    </main>
   );
 }
