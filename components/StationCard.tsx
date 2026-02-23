@@ -10,17 +10,38 @@ function formatDistance(km: number): string {
 }
 
 function getMapsUrl(station: Station): string {
-  if (station.lat != null && station.lng != null) {
-    return `https://www.google.com/maps/search/?api=1&query=${station.lat},${station.lng}`;
+  // Support different coordinate field names across sources
+  const lat = (station as any).lat ?? (station as any).latitude;
+  const lng =
+    (station as any).lng ??
+    (station as any).lon ??
+    (station as any).longitude;
+
+  if (lat != null && lng != null) {
+    return `https://www.google.com/maps/search/?api=1&query=${lat},${lng}`;
   }
+
   const query = [station.name, station.address, station.city]
     .filter(Boolean)
     .join(", ");
-  return `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(query)}`;
+
+  return `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(
+    query
+  )}`;
 }
 
 export default function StationCard({ station }: StationCardProps) {
   const mapsUrl = getMapsUrl(station);
+
+  const rawDistance =
+    (station as any).distance ??
+    (station as any).distanceKm ??
+    (station as any).distance_km;
+
+  const distanceKm =
+    typeof rawDistance === "number" && Number.isFinite(rawDistance)
+      ? rawDistance
+      : null;
 
   return (
     <div className="bg-slate-800 border border-slate-700 rounded-xl p-4 flex flex-col gap-3 hover:border-green-500 transition-colors">
@@ -28,9 +49,10 @@ export default function StationCard({ station }: StationCardProps) {
         <h2 className="text-white font-semibold text-base leading-snug line-clamp-2">
           {station.name}
         </h2>
-        {station.distance != null && (
+
+        {distanceKm != null && (
           <span className="flex-shrink-0 text-green-400 text-sm font-medium bg-green-900/40 px-2 py-0.5 rounded-full">
-            {formatDistance(station.distance)}
+            {formatDistance(distanceKm)}
           </span>
         )}
       </div>
@@ -46,16 +68,20 @@ export default function StationCard({ station }: StationCardProps) {
             </span>
           </p>
         )}
-        {station.power && (
+
+        {(station as any).power && (
           <p className="flex items-center gap-1">
             <span>⚡</span>
-            <span className="text-yellow-400 font-medium">{station.power}</span>
+            <span className="text-yellow-400 font-medium">
+              {(station as any).power}
+            </span>
           </p>
         )}
-        {station.network && (
+
+        {(station as any).operator && (
           <p className="flex items-center gap-1">
             <span>🔌</span>
-            <span>{station.network}</span>
+            <span>{(station as any).operator}</span>
           </p>
         )}
       </div>
@@ -64,7 +90,7 @@ export default function StationCard({ station }: StationCardProps) {
         href={mapsUrl}
         target="_blank"
         rel="noopener noreferrer"
-        className="mt-auto inline-flex items-center justify-center gap-2 bg-green-600 hover:bg-green-500 text-white text-sm font-medium py-2 px-4 rounded-lg transition-colors"
+        className="mt-auto inline-flex items-center justify-center gap-2 bg-green-600 hover:bg-green-500 text-white text-sm font-medium py-2 px-4 rounded-lg transition-colors w-full"
       >
         <span>🗺️</span>
         Open in Google Maps

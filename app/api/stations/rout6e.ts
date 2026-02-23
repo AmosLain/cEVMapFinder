@@ -214,7 +214,7 @@ export async function GET(req: NextRequest) {
     const originLat = Number(effectiveLat);
     const originLng = Number(effectiveLng);
     if (Number.isFinite(originLat) && Number.isFinite(originLng)) {
-      const distanceKm = Math.min(Math.max(requestedDistance, 50), 100); // ✅ same clamp as fetch
+      const distanceKm = Math.min(Math.max(requestedDistance, 1), 100);
       stations = stations
         .map((s: any) => ({
           ...s,

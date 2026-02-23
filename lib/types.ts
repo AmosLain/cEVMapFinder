@@ -9,6 +9,7 @@ export type Station = {
   lat?: number;
   lng?: number;
   distance?: number; // km, computed client-side
+  distanceKm?: number; // alias (some components may use this)
 };
 
 export type ApiStationsResponse = {
