@@ -40,13 +40,14 @@ export default function HomePage() {
     setError(null);
 
     const params = new URLSearchParams();
+    params.set("limit","200");
     if (opts?.lat != null && opts?.lng != null) {
       params.set("lat", String(opts.lat));
       params.set("lng", String(opts.lng));
-      params.set("distanceKm", "35");
+      params.set("distanceKm", "15");
     } else if (opts?.search) {
       params.set("search", opts.search);
-      params.set("distanceKm", "35");
+      params.set("distanceKm", "15");
     }
 
     const url = `/api/stations${params.size > 0 ? "?" + params.toString() : ""}`;
