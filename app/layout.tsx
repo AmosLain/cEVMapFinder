@@ -16,7 +16,7 @@ export const metadata: Metadata = {
     url: "https://www.evmapfinder.com",
     images: [
       {
-        url: "https://www.evmapfinder.com/og-image.png", // יש ליצור תמונה זו!
+        url: "https://www.evmapfinder.com/og-image.png",
         width: 1200,
         height: 630,
         alt: "EVMapFinder - EV Charging Stations Map",
@@ -37,7 +37,11 @@ export default function RootLayout({
   return (
     <html lang="en">
       <head>
-        {/* JSON-LD Structured Data */}
+        <script
+          async
+          src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-6510652100353402"
+          crossOrigin="anonymous"
+        />
         <script
           type="application/ld+json"
           dangerouslySetInnerHTML={{
