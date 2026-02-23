@@ -186,7 +186,7 @@ export default function HomePage() {
       <div className="max-w-5xl mx-auto px-4 py-10">
         <header className="mb-8">
           <h1 className="text-3xl sm:text-4xl font-bold tracking-tight">
-            cEVMapFinder
+            EVMapFinder
           </h1>
           <p className="text-slate-400 mt-2">
             Global EV charging stations (search by place or use Near Me)

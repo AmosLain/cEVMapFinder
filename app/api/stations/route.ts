@@ -1,7 +1,17 @@
 import { NextRequest, NextResponse } from "next/server";
+
+export const dynamic = "force-dynamic";
+export const revalidate = 0;
+
 import { demoStations } from "@/lib/demoStations";
 import type { Station } from "@/lib/types";
 
+
+function jsonNoStore(body: any, init?: { status?: number }) {
+  const res = NextResponse.json(body, { status: init?.status ?? 200 });
+  res.headers.set("Cache-Control", "no-store, max-age=0");
+  return res;
+}
 const TIMEOUT_MS = 12000;
 
 function mapOcmToStation(item: Record<string, unknown>): Station {
@@ -140,7 +150,7 @@ export async function GET(req: NextRequest) {
 
     // If nothing provided, do not guess a country. Return empty (global site).
     if ((!lat || !lng) && !search) {
-      return NextResponse.json({ stations: [] }, { status: 200 });
+      return jsonNoStore({ stations: [] }, { status: 200 });
     }
 
     let effectiveLat = lat;
@@ -149,7 +159,7 @@ export async function GET(req: NextRequest) {
     if ((!effectiveLat || !effectiveLng) && search) {
       const geo = await geocodeToLatLng(search);
       if (!geo) {
-        return NextResponse.json(
+        return jsonNoStore(
           { stations: [], error: { message: `Could not find location for: ${search}` } },
           { status: 200 }
         );
@@ -160,7 +170,7 @@ export async function GET(req: NextRequest) {
 
     // If still missing (shouldn't), return empty
     if (!effectiveLat || !effectiveLng) {
-      return NextResponse.json({ stations: [] }, { status: 200 });
+      return jsonNoStore({ stations: [] }, { status: 200 });
     }
 
     const provider = (process.env.STATIONS_PROVIDER ?? "ocm").toLowerCase();
@@ -205,9 +215,9 @@ export async function GET(req: NextRequest) {
       stations = withDistance;
     }
 
-    return NextResponse.json({ stations: stations.slice(0, limit) }, { status: 200 });
+    return jsonNoStore({ stations: stations.slice(0, limit) }, { status: 200 });
   } catch (err) {
     const msg = err instanceof Error ? err.message : "Unknown error";
-    return NextResponse.json({ stations: [], error: { message: msg } }, { status: 500 });
+    return jsonNoStore({ stations: [], error: { message: msg } }, { status: 500 });
   }
 }
