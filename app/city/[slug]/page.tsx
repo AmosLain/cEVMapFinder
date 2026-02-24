@@ -157,6 +157,7 @@ function getCity(slug: string): City | undefined {
 
 async function fetchStationsForCity(city: City): Promise<Station[]> {
   const radius = city.radiusKm ?? 20;
+
   const url =
     `https://api.openchargemap.io/v3/poi/?output=json` +
     `&latitude=${encodeURIComponent(city.lat)}` +
@@ -170,8 +171,10 @@ async function fetchStationsForCity(city: City): Promise<Station[]> {
   try {
     const res = await fetch(url, { next: { revalidate: 3600 } });
     if (!res.ok) return [];
+
     const data = await res.json();
     const items = Array.isArray(data) ? data : [];
+
     return items.map((item: any) => ({
       id: String(item.ID),
       name: String(item.AddressInfo?.Title ?? "Unknown Station"),
@@ -199,256 +202,105 @@ export async function generateMetadata({
   if (!city) return {};
 
   const title = `EV Charging Stations in ${city.name} (${city.countryName}) | EVMapFinder`;
-  const description = `Find all EV charging stations in ${city.name}, ${city.countryName}. Browse up to ${city.radiusKm ?? 20}km of charging points and get directions instantly via Google Maps.`;
+  const description = `Find EV charging stations in ${city.name}. Browse nearby chargers and open navigation instantly.`;
   const canonical = `https://www.evmapfinder.com/city/${city.slug}`;
 
   return {
     title,
     description,
     alternates: { canonical },
-    openGraph: { title, description, type: "website", url: canonical },
+    openGraph: {
+      title,
+      description,
+      type: "website",
+      url: canonical,
+    },
     robots: { index: true, follow: true },
   };
 }
 
-// ─── JSON-LD Structured Data ─────────────────────────────────────────────────
-
-function CityJsonLd({ city, stations }: { city: City; stations: Station[] }) {
-  const canonical = `https://www.evmapfinder.com/city/${city.slug}`;
-  const radius = city.radiusKm ?? 20;
-
-  const breadcrumb = {
-    "@context": "https://schema.org",
-    "@type": "BreadcrumbList",
-    itemListElement: [
-      { "@type": "ListItem", position: 1, name: "Home", item: "https://www.evmapfinder.com" },
-      { "@type": "ListItem", position: 2, name: `EV Charging in ${city.name}`, item: canonical },
-    ],
-  };
-
-  const itemList = {
-    "@context": "https://schema.org",
-    "@type": "ItemList",
-    name: `EV Charging Stations in ${city.name}`,
-    description: `List of EV charging points within ${radius}km of ${city.name} city center.`,
-    numberOfItems: stations.length,
-    itemListElement: stations.slice(0, 10).map((s, i) => ({
-      "@type": "ListItem",
-      position: i + 1,
-      name: s.name,
-      item: {
-        "@type": "LocalBusiness",
-        name: s.name,
-        address: {
-          "@type": "PostalAddress",
-          streetAddress: s.address,
-          addressLocality: s.city || city.name,
-          addressCountry: city.countryName,
-        },
-        ...(typeof s.lat === "number" && typeof s.lng === "number"
-          ? { geo: { "@type": "GeoCoordinates", latitude: s.lat, longitude: s.lng } }
-          : {}),
-      },
-    })),
-  };
-
-  const faq = {
-    "@context": "https://schema.org",
-    "@type": "FAQPage",
-    mainEntity: [
-      {
-        "@type": "Question",
-        name: `How many EV charging stations are in ${city.name}?`,
-        acceptedAnswer: {
-          "@type": "Answer",
-          text: `EVMapFinder currently lists ${stations.length} EV charging stations within ${radius}km of ${city.name} city center, sourced from OpenChargeMap.`,
-        },
-      },
-      {
-        "@type": "Question",
-        name: `How do I find EV charging stations near me in ${city.name}?`,
-        acceptedAnswer: {
-          "@type": "Answer",
-          text: `Use the "Find near me" button on the EVMapFinder homepage to automatically detect your location and sort charging stations by distance in real time.`,
-        },
-      },
-      {
-        "@type": "Question",
-        name: `Are the EV charging stations in ${city.name} free to use?`,
-        acceptedAnswer: {
-          "@type": "Answer",
-          text: `Charging costs vary by network and operator. Some stations in ${city.name} offer free charging while others require payment. Check the individual station or its operator's app for current pricing.`,
-        },
-      },
-    ],
-  };
-
-  return (
-    <>
-      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumb) }} />
-      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(itemList) }} />
-      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(faq) }} />
-    </>
-  );
-}
-
-// ─── Page ─────────────────────────────────────────────────────────────────────
-
-export default async function CityPage({ params }: { params: { slug: string } }) {
+export default async function CityPage({
+  params,
+}: {
+  params: { slug: string };
+}) {
   const city = getCity(params.slug);
   if (!city) notFound();
 
   const stations = await fetchStationsForCity(city);
-  const radius = city.radiusKm ?? 20;
 
   return (
-    <>
-      <CityJsonLd city={city} stations={stations} />
-
-      <main className="min-h-screen bg-slate-950 text-white">
-        <div className="max-w-5xl mx-auto px-4 py-10">
-
-          {/* Breadcrumbs */}
-          <nav aria-label="Breadcrumb" className="mb-6 text-sm text-slate-400">
-            <ol className="flex items-center gap-2">
-              <li>
-                <Link href="/" className="hover:text-white transition-colors">
-                  Home
-                </Link>
-              </li>
-              <li aria-hidden="true">›</li>
-              <li className="text-slate-200">EV Charging in {city.name}</li>
-            </ol>
-          </nav>
-
-          {/* Header */}
-          <header className="mb-6">
-            <h1 className="text-3xl sm:text-4xl font-bold tracking-tight">
-              EV Charging Stations in {city.name}
-            </h1>
-            <p className="text-slate-400 mt-2">
-              {city.countryName} · Within ~{radius}km of the city center
-            </p>
-          </header>
-
-          {/* Intro paragraph — helps SEO with unique text per city */}
-          <section className="mb-8">
-            <p className="text-slate-300 leading-relaxed">
-              Looking for electric vehicle charging stations in{" "}
-              <strong>{city.name}</strong>? EVMapFinder lists{" "}
-              <strong>{stations.length} charging points</strong> within {radius}km
-              of {city.name} city center, sourced live from OpenChargeMap. Each
-              result includes the station name, address, and a one-tap link to
-              open it in Google Maps — so you can navigate there instantly from
-              your phone.
-            </p>
-          </section>
-
-          {/* Tip banner */}
-          <section className="mb-8">
-            <div className="bg-slate-900/60 border border-slate-800 rounded-xl p-4">
-              <p className="text-slate-300">
-                💡 Tip: use the{" "}
-                <Link href="/" className="text-emerald-400 hover:text-emerald-300 underline">
-                  "Find near me"
-                </Link>{" "}
-                button on the homepage for real-time sorting by your exact
-                current location.
-              </p>
-            </div>
-          </section>
-
-          {/* Station list */}
-          <section className="mb-12">
-            <h2 className="text-xl font-semibold mb-4">
-              Nearby stations ({stations.length})
-            </h2>
-
-            {stations.length === 0 ? (
-              <div className="bg-slate-900/60 border border-slate-800 rounded-xl p-4 text-slate-300">
-                No stations found for this area right now. Try another city or
-                use the homepage "Find near me".
-              </div>
-            ) : (
-              <ul className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-                {stations.map((s) => (
-                  <li key={s.id} className="bg-slate-800 rounded-xl p-4">
-                    <h3 className="font-semibold">{s.name}</h3>
-                    <p className="text-slate-400 text-sm">{s.address}</p>
-                    <p className="text-slate-400 text-sm">
-                      {s.city}
-                      {s.city && s.country ? ", " : ""}
-                      {s.country}
-                    </p>
-                    {typeof s.lat === "number" && typeof s.lng === "number" ? (
-                      <a
-                        className="inline-block mt-3 text-sm text-emerald-300 hover:text-emerald-200"
-                        href={`https://www.google.com/maps?q=${s.lat},${s.lng}`}
-                        target="_blank"
-                        rel="noreferrer"
-                      >
-                        Open in Google Maps →
-                      </a>
-                    ) : null}
-                  </li>
-                ))}
-              </ul>
-            )}
-          </section>
-
-          {/* FAQ section — JSON-LD above matches these questions */}
-          <section className="mb-12">
-            <h2 className="text-xl font-semibold mb-6">
-              Frequently Asked Questions
-            </h2>
-            <dl className="space-y-6">
-              <div>
-                <dt className="font-medium text-white">
-                  How many EV charging stations are in {city.name}?
-                </dt>
-                <dd className="mt-1 text-slate-400 text-sm leading-relaxed">
-                  EVMapFinder currently lists {stations.length} charging stations
-                  within {radius}km of {city.name} city center, sourced from
-                  OpenChargeMap. Data is refreshed hourly.
-                </dd>
-              </div>
-              <div>
-                <dt className="font-medium text-white">
-                  How do I find EV charging stations near me in {city.name}?
-                </dt>
-                <dd className="mt-1 text-slate-400 text-sm leading-relaxed">
-                  Use the "Find near me" button on the{" "}
-                  <Link href="/" className="text-emerald-400 hover:text-emerald-300 underline">
-                    EVMapFinder homepage
-                  </Link>{" "}
-                  to auto-detect your location and sort results by distance in
-                  real time.
-                </dd>
-              </div>
-              <div>
-                <dt className="font-medium text-white">
-                  Are the EV charging stations in {city.name} free to use?
-                </dt>
-                <dd className="mt-1 text-slate-400 text-sm leading-relaxed">
-                  Pricing varies by network and operator. Some stations in{" "}
-                  {city.name} offer free charging; others require a membership or
-                  per-kWh payment. Check the individual station or its operator's
-                  app for current pricing.
-                </dd>
-              </div>
-            </dl>
-          </section>
-
-          {/* Footer */}
-          <footer className="mt-4 text-sm text-slate-500">
-            <p>
-              Data source: OpenChargeMap (public endpoint). Results may vary by
-              availability. Last updated: hourly.
-            </p>
-          </footer>
-
+    <main className="min-h-screen bg-slate-950 text-white">
+      <div className="max-w-5xl mx-auto px-4 py-10">
+        <div className="mb-6">
+          <Link href="/" className="text-slate-300 hover:text-white">
+            ← Back to Home
+          </Link>
         </div>
-      </main>
-    </>
+
+        <header className="mb-8">
+          <h1 className="text-3xl sm:text-4xl font-bold tracking-tight">
+            EV Charging Stations in {city.name}
+          </h1>
+          <p className="text-slate-400 mt-2">
+            {city.countryName} · Within ~{city.radiusKm ?? 20}km of the city center
+          </p>
+        </header>
+
+        <section className="mb-10">
+          <div className="bg-slate-900/60 border border-slate-800 rounded-xl p-4">
+            <p className="text-slate-300">
+              Tip: open this page on your phone while driving and use "Find near
+              me" on the homepage for exact distance sorting.
+            </p>
+          </div>
+        </section>
+
+        <section className="mb-8">
+          <h2 className="text-xl font-semibold mb-4">
+            Nearby stations ({stations.length})
+          </h2>
+
+          {stations.length === 0 ? (
+            <div className="bg-slate-900/60 border border-slate-800 rounded-xl p-4 text-slate-300">
+              No stations found right now for this area. Try another city or use
+              the homepage "Find near me".
+            </div>
+          ) : (
+            <ul className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+              {stations.map((s) => (
+                <li key={s.id} className="bg-slate-800 rounded-xl p-4">
+                  <h3 className="font-semibold">{s.name}</h3>
+                  <p className="text-slate-400 text-sm">{s.address}</p>
+                  <p className="text-slate-400 text-sm">
+                    {s.city}
+                    {s.city && s.country ? ", " : ""}
+                    {s.country}
+                  </p>
+
+                  {typeof s.lat === "number" && typeof s.lng === "number" ? (
+                    <a
+                      className="inline-block mt-3 text-sm text-emerald-300 hover:text-emerald-200"
+                      href={`https://www.google.com/maps?q=${s.lat},${s.lng}`}
+                      target="_blank"
+                      rel="noreferrer"
+                    >
+                      Open in Google Maps →
+                    </a>
+                  ) : null}
+                </li>
+              ))}
+            </ul>
+          )}
+        </section>
+
+        <footer className="mt-12 text-sm text-slate-500">
+          <p>
+            Data source: OpenChargeMap (public endpoint). Results may vary by
+            availability.
+          </p>
+        </footer>
+      </div>
+    </main>
   );
 }
