@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
-import Script from "next/script";
 import "./globals.css";
+import CookieBanner from "./components/CookieBanner";
+import ConsentScripts from "./components/ConsentScripts";
 
 export const metadata: Metadata = {
   title: "EVMapFinder — Find EV Charging Stations Near You",
@@ -30,58 +31,72 @@ export const metadata: Metadata = {
   },
 };
 
-export default function RootLayout({
-  children,
-}: {
-  children: React.ReactNode;
-}) {
+export default function RootLayout({ children }: { children: React.ReactNode }) {
+  const structuredData = {
+    "@context": "https://schema.org",
+    "@type": "WebApplication",
+    name: "EVMapFinder",
+    url: "https://www.evmapfinder.com",
+    description:
+      "Find EV charging stations worldwide. Search by city, address, or use your current location.",
+    applicationCategory: "TravelApplication",
+    operatingSystem: "All",
+    offers: {
+      "@type": "Offer",
+      price: "0",
+      priceCurrency: "USD",
+    },
+  };
+
   return (
     <html lang="en">
       <head>
-        {/* Google AdSense */}
-        <script
-          async
-          src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-6510652100353402"
-          crossOrigin="anonymous"
-        />
-
-        {/* Google Ads Tag */}
-        <Script
-          src="https://www.googletagmanager.com/gtag/js?id=AW-17199339752"
-          strategy="afterInteractive"
-        />
-        <Script id="google-ads-tag" strategy="afterInteractive">
-          {`
-            window.dataLayer = window.dataLayer || [];
-            function gtag(){dataLayer.push(arguments);}
-            gtag('js', new Date());
-            gtag('config', 'AW-17199339752');
-          `}
-        </Script>
-
-        {/* Structured Data */}
         <script
           type="application/ld+json"
-          dangerouslySetInnerHTML={{
-            __html: JSON.stringify({
-              "@context": "https://schema.org",
-              "@type": "WebApplication",
-              name: "EVMapFinder",
-              url: "https://www.evmapfinder.com",
-              description:
-                "Find EV charging stations worldwide. Search by city, address, or use your current location.",
-              applicationCategory: "TravelApplication",
-              operatingSystem: "All",
-              offers: {
-                "@type": "Offer",
-                price: "0",
-                priceCurrency: "USD",
-              },
-            }),
-          }}
+          dangerouslySetInnerHTML={{ __html: JSON.stringify(structuredData) }}
         />
       </head>
-      <body>{children}</body>
+
+      <body className="min-h-screen bg-white text-slate-900 flex flex-col">
+
+        {/* תוכן האתר */}
+        <main className="flex-1">
+          {children}
+        </main>
+
+        {/* פוטר גלובלי */}
+        <footer className="border-t border-slate-200 bg-white">
+          <div className="max-w-6xl mx-auto px-4 py-8 text-sm">
+
+            <div className="flex flex-wrap gap-6">
+              <a href="/privacy" className="hover:underline">
+                Privacy Policy
+              </a>
+              <a href="/terms" className="hover:underline">
+                Terms of Use
+              </a>
+              <a href="mailto:support@evmapfinder.com" className="hover:underline">
+                Contact
+              </a>
+            </div>
+
+            <p className="mt-4 text-slate-600 max-w-3xl leading-relaxed">
+              EV charging station data is provided by third-party sources and may
+              not always be accurate or up to date. Always verify availability,
+              compatibility, and access rules before relying on it.
+            </p>
+
+            <p className="mt-3 text-xs text-slate-500">
+              © {new Date().getFullYear()} EVMapFinder
+            </p>
+          </div>
+        </footer>
+
+        {/* קוקיז + טעינת סקריפטים אחרי אישור */}
+        <CookieBanner />
+        <ConsentScripts />
+
+      </body>
     </html>
   );
 }
