@@ -155,45 +155,6 @@ function getCity(slug: string): City | undefined {
   return CITIES.find((c) => c.slug === slug);
 }
 
-// ─── FIX #1: generateStaticParams — tells Next.js to pre-build ALL city pages ──
-// Without this, dynamic routes may return 404 or not be crawlable by Google.
-export async function generateStaticParams() {
-  return CITIES.map((c) => ({ slug: c.slug }));
-}
-
-// ─── FIX #2: generateMetadata — unique <title> + <meta> + canonical per city ──
-// Google needs a unique title/description to decide each page is worth indexing.
-export async function generateMetadata({
-  params,
-}: {
-  params: { slug: string };
-}): Promise<Metadata> {
-  const city = getCity(params.slug);
-  if (!city) return {};
-
-  const radius = city.radiusKm ?? 20;
-  const title = `EV Charging Stations in ${city.name}, ${city.countryName} | EVMapFinder`;
-  const description = `Find electric vehicle charging stations in ${city.name}, ${city.countryName}. Browse up to ${radius}km of EV charging points with directions via Google Maps. Updated hourly.`;
-  const canonical = `https://www.evmapfinder.com/city/${city.slug}`;
-
-  return {
-    title,
-    description,
-    // FIX #3: canonical tag — prevents duplicate content issues
-    alternates: { canonical },
-    openGraph: {
-      title,
-      description,
-      type: "website",
-      url: canonical,
-    },
-    // FIX #4: explicit robots directive — tells Google to index this page
-    robots: { index: true, follow: true },
-  };
-}
-
-// ─── Fetch Stations ───────────────────────────────────────────────────────────
-
 async function fetchStationsForCity(city: City): Promise<Station[]> {
   const radius = city.radiusKm ?? 20;
   const url =
@@ -225,7 +186,32 @@ async function fetchStationsForCity(city: City): Promise<Station[]> {
   }
 }
 
-// ─── JSON-LD Structured Data ──────────────────────────────────────────────────
+export async function generateStaticParams() {
+  return CITIES.map((c) => ({ slug: c.slug }));
+}
+
+export async function generateMetadata({
+  params,
+}: {
+  params: { slug: string };
+}): Promise<Metadata> {
+  const city = getCity(params.slug);
+  if (!city) return {};
+
+  const title = `EV Charging Stations in ${city.name} (${city.countryName}) | EVMapFinder`;
+  const description = `Find all EV charging stations in ${city.name}, ${city.countryName}. Browse up to ${city.radiusKm ?? 20}km of charging points and get directions instantly via Google Maps.`;
+  const canonical = `https://www.evmapfinder.com/city/${city.slug}`;
+
+  return {
+    title,
+    description,
+    alternates: { canonical },
+    openGraph: { title, description, type: "website", url: canonical },
+    robots: { index: true, follow: true },
+  };
+}
+
+// ─── JSON-LD Structured Data ─────────────────────────────────────────────────
 
 function CityJsonLd({ city, stations }: { city: City; stations: Station[] }) {
   const canonical = `https://www.evmapfinder.com/city/${city.slug}`;
@@ -275,7 +261,7 @@ function CityJsonLd({ city, stations }: { city: City; stations: Station[] }) {
         name: `How many EV charging stations are in ${city.name}?`,
         acceptedAnswer: {
           "@type": "Answer",
-          text: `EVMapFinder currently lists ${stations.length} EV charging stations within ${radius}km of ${city.name} city center, sourced from OpenChargeMap. Data is refreshed hourly.`,
+          text: `EVMapFinder currently lists ${stations.length} EV charging stations within ${radius}km of ${city.name} city center, sourced from OpenChargeMap.`,
         },
       },
       {
@@ -315,14 +301,6 @@ export default async function CityPage({ params }: { params: { slug: string } })
   const stations = await fetchStationsForCity(city);
   const radius = city.radiusKm ?? 20;
 
-  // FIX #5: Group nearby cities for internal linking
-  // Internal links between city pages help Google discover and index all pages.
-  const nearbyCities = CITIES.filter(
-    (c) =>
-      c.slug !== city.slug &&
-      c.countryName === city.countryName
-  ).slice(0, 6);
-
   return (
     <>
       <CityJsonLd city={city} stations={stations} />
@@ -353,7 +331,7 @@ export default async function CityPage({ params }: { params: { slug: string } })
             </p>
           </header>
 
-          {/* Intro paragraph */}
+          {/* Intro paragraph — helps SEO with unique text per city */}
           <section className="mb-8">
             <p className="text-slate-300 leading-relaxed">
               Looking for electric vehicle charging stations in{" "}
@@ -372,7 +350,7 @@ export default async function CityPage({ params }: { params: { slug: string } })
               <p className="text-slate-300">
                 💡 Tip: use the{" "}
                 <Link href="/" className="text-emerald-400 hover:text-emerald-300 underline">
-                  &quot;Find near me&quot;
+                  "Find near me"
                 </Link>{" "}
                 button on the homepage for real-time sorting by your exact
                 current location.
@@ -389,7 +367,7 @@ export default async function CityPage({ params }: { params: { slug: string } })
             {stations.length === 0 ? (
               <div className="bg-slate-900/60 border border-slate-800 rounded-xl p-4 text-slate-300">
                 No stations found for this area right now. Try another city or
-                use the homepage &quot;Find near me&quot;.
+                use the homepage "Find near me".
               </div>
             ) : (
               <ul className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
@@ -418,7 +396,7 @@ export default async function CityPage({ params }: { params: { slug: string } })
             )}
           </section>
 
-          {/* FAQ section */}
+          {/* FAQ section — JSON-LD above matches these questions */}
           <section className="mb-12">
             <h2 className="text-xl font-semibold mb-6">
               Frequently Asked Questions
@@ -439,7 +417,7 @@ export default async function CityPage({ params }: { params: { slug: string } })
                   How do I find EV charging stations near me in {city.name}?
                 </dt>
                 <dd className="mt-1 text-slate-400 text-sm leading-relaxed">
-                  Use the &quot;Find near me&quot; button on the{" "}
+                  Use the "Find near me" button on the{" "}
                   <Link href="/" className="text-emerald-400 hover:text-emerald-300 underline">
                     EVMapFinder homepage
                   </Link>{" "}
@@ -454,35 +432,12 @@ export default async function CityPage({ params }: { params: { slug: string } })
                 <dd className="mt-1 text-slate-400 text-sm leading-relaxed">
                   Pricing varies by network and operator. Some stations in{" "}
                   {city.name} offer free charging; others require a membership or
-                  per-kWh payment. Check the individual station or its operator&apos;s
+                  per-kWh payment. Check the individual station or its operator's
                   app for current pricing.
                 </dd>
               </div>
             </dl>
           </section>
-
-          {/* FIX #5: Internal links to other cities in same country
-              This is CRITICAL for Google to discover and index all city pages.
-              Without internal links, Google may ignore sitemap entries. */}
-          {nearbyCities.length > 0 && (
-            <section className="mb-12">
-              <h2 className="text-xl font-semibold mb-4">
-                More cities in {city.countryName}
-              </h2>
-              <ul className="flex flex-wrap gap-3">
-                {nearbyCities.map((c) => (
-                  <li key={c.slug}>
-                    <Link
-                      href={`/city/${c.slug}`}
-                      className="inline-block px-4 py-2 bg-slate-800 hover:bg-slate-700 rounded-lg text-sm text-emerald-300 hover:text-emerald-200 transition-colors"
-                    >
-                      EV Charging in {c.name}
-                    </Link>
-                  </li>
-                ))}
-              </ul>
-            </section>
-          )}
 
           {/* Footer */}
           <footer className="mt-4 text-sm text-slate-500">
