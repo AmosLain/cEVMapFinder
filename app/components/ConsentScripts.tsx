@@ -1,46 +1,46 @@
-use client;
+"use client";
 
-import { useEffect, useState } from react;
-import Script from nextscript;
-import { CONSENT_KEY } from .CookieBanner;
+import { useEffect, useState } from "react";
+import Script from "next/script";
+import { CONSENT_KEY } from "./CookieBanner";
 
 export default function ConsentScripts() {
   const [allowed, setAllowed] = useState(false);
 
-  useEffect(() = {
+  useEffect(() => {
     const existing = localStorage.getItem(CONSENT_KEY);
-    setAllowed(existing === accepted);
+    setAllowed(existing === "accepted");
 
-    const handler = (e any) = setAllowed(e.detail === accepted);
-    window.addEventListener(evmf-cookie-consent, handler);
-    return () = window.removeEventListener(evmf-cookie-consent, handler);
+    const handler = (e: any) => setAllowed(e.detail === "accepted");
+    window.addEventListener("evmf-cookie-consent", handler);
+    return () => window.removeEventListener("evmf-cookie-consent", handler);
   }, []);
 
   if (!allowed) return null;
 
   return (
-    
-      { Google AdSense }
-      Script
+    <>
+      {/* Google AdSense */}
+      <Script
         async
-        strategy=afterInteractive
-        src=httpspagead2.googlesyndication.compageadjsadsbygoogle.jsclient=ca-pub-6510652100353402
-        crossOrigin=anonymous
-      
+        strategy="afterInteractive"
+        src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-6510652100353402"
+        crossOrigin="anonymous"
+      />
 
-      { Google Ads Tag }
-      Script
-        src=httpswww.googletagmanager.comgtagjsid=AW-17199339752
-        strategy=afterInteractive
-      
-      Script id=google-ads-tag strategy=afterInteractive
+      {/* Google Ads Tag */}
+      <Script
+        src="https://www.googletagmanager.com/gtag/js?id=AW-17199339752"
+        strategy="afterInteractive"
+      />
+      <Script id="google-ads-tag" strategy="afterInteractive">
         {`
-          window.dataLayer = window.dataLayer  [];
+          window.dataLayer = window.dataLayer || [];
           function gtag(){dataLayer.push(arguments);}
           gtag('js', new Date());
           gtag('config', 'AW-17199339752');
         `}
-      Script
-    
+      </Script>
+    </>
   );
 }
