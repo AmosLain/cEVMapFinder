@@ -10,7 +10,7 @@ export default function ConsentScripts() {
   useEffect(() = {
     const existing = localStorage.getItem(CONSENT_KEY);
     setAllowed(existing === accepted);
-
+י
     const handler = (e any) = setAllowed(e.detail === accepted);
     window.addEventListener(evmf-cookie-consent, handler);
     return () = window.removeEventListener(evmf-cookie-consent, handler);
