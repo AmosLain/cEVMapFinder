@@ -33,15 +33,82 @@ const CITIES: City[] = [
   { slug: "ashdod", name: "Ashdod", countryName: "Israel", lat: 31.8044, lng: 34.6553, radiusKm: 25 },
   { slug: "eilat", name: "Eilat", countryName: "Israel", lat: 29.5577, lng: 34.9519, radiusKm: 25 },
 
-  // United States
-  { slug: "new-york", name: "New York", countryName: "United States", lat: 40.7128, lng: -74.0060 },
-  { slug: "los-angeles", name: "Los Angeles", countryName: "United States", lat: 34.0522, lng: -118.2437 },
-  { slug: "san-francisco", name: "San Francisco", countryName: "United States", lat: 37.7749, lng: -122.4194 },
-  { slug: "san-diego", name: "San Diego", countryName: "United States", lat: 32.7157, lng: -117.1611 },
-  { slug: "seattle", name: "Seattle", countryName: "United States", lat: 47.6062, lng: -122.3321 },
-  { slug: "austin", name: "Austin", countryName: "United States", lat: 30.2672, lng: -97.7431 },
-  { slug: "chicago", name: "Chicago", countryName: "United States", lat: 41.8781, lng: -87.6298 },
-  { slug: "miami", name: "Miami", countryName: "United States", lat: 25.7617, lng: -80.1918 },
+  // United States — California
+  { slug: "los-angeles", name: "Los Angeles", countryName: "United States", lat: 34.0522, lng: -118.2437, radiusKm: 25 },
+  { slug: "san-francisco", name: "San Francisco", countryName: "United States", lat: 37.7749, lng: -122.4194, radiusKm: 20 },
+  { slug: "san-diego", name: "San Diego", countryName: "United States", lat: 32.7157, lng: -117.1611, radiusKm: 25 },
+  { slug: "san-jose", name: "San Jose", countryName: "United States", lat: 37.3382, lng: -121.8863, radiusKm: 20 },
+  { slug: "sacramento", name: "Sacramento", countryName: "United States", lat: 38.5816, lng: -121.4944, radiusKm: 20 },
+  { slug: "fresno", name: "Fresno", countryName: "United States", lat: 36.7378, lng: -119.7871, radiusKm: 20 },
+  { slug: "long-beach", name: "Long Beach", countryName: "United States", lat: 33.7701, lng: -118.1937, radiusKm: 15 },
+  { slug: "oakland", name: "Oakland", countryName: "United States", lat: 37.8044, lng: -122.2712, radiusKm: 15 },
+  { slug: "anaheim", name: "Anaheim", countryName: "United States", lat: 33.8366, lng: -117.9143, radiusKm: 15 },
+  { slug: "santa-ana", name: "Santa Ana", countryName: "United States", lat: 33.7455, lng: -117.8677, radiusKm: 15 },
+  { slug: "irvine", name: "Irvine", countryName: "United States", lat: 33.6846, lng: -117.8265, radiusKm: 15 },
+  { slug: "palo-alto", name: "Palo Alto", countryName: "United States", lat: 37.4419, lng: -122.1430, radiusKm: 15 },
+  { slug: "santa-monica", name: "Santa Monica", countryName: "United States", lat: 34.0195, lng: -118.4912, radiusKm: 15 },
+  { slug: "pasadena", name: "Pasadena", countryName: "United States", lat: 34.1478, lng: -118.1445, radiusKm: 15 },
+  { slug: "berkeley", name: "Berkeley", countryName: "United States", lat: 37.8716, lng: -122.2727, radiusKm: 15 },
+
+  // United States — Texas
+  { slug: "austin", name: "Austin", countryName: "United States", lat: 30.2672, lng: -97.7431, radiusKm: 25 },
+  { slug: "houston", name: "Houston", countryName: "United States", lat: 29.7604, lng: -95.3698, radiusKm: 25 },
+  { slug: "dallas", name: "Dallas", countryName: "United States", lat: 32.7767, lng: -96.7970, radiusKm: 25 },
+  { slug: "san-antonio", name: "San Antonio", countryName: "United States", lat: 29.4241, lng: -98.4936, radiusKm: 25 },
+  { slug: "fort-worth", name: "Fort Worth", countryName: "United States", lat: 32.7555, lng: -97.3308, radiusKm: 20 },
+  { slug: "el-paso", name: "El Paso", countryName: "United States", lat: 31.7619, lng: -106.4850, radiusKm: 20 },
+  { slug: "plano", name: "Plano", countryName: "United States", lat: 33.0198, lng: -96.6989, radiusKm: 15 },
+
+  // United States — Florida
+  { slug: "miami", name: "Miami", countryName: "United States", lat: 25.7617, lng: -80.1918, radiusKm: 20 },
+  { slug: "orlando", name: "Orlando", countryName: "United States", lat: 28.5383, lng: -81.3792, radiusKm: 20 },
+  { slug: "tampa", name: "Tampa", countryName: "United States", lat: 27.9506, lng: -82.4572, radiusKm: 20 },
+  { slug: "jacksonville", name: "Jacksonville", countryName: "United States", lat: 30.3322, lng: -81.6557, radiusKm: 25 },
+  { slug: "fort-lauderdale", name: "Fort Lauderdale", countryName: "United States", lat: 26.1224, lng: -80.1373, radiusKm: 15 },
+  { slug: "st-petersburg", name: "St. Petersburg", countryName: "United States", lat: 27.7676, lng: -82.6403, radiusKm: 15 },
+
+  // United States — New York & Northeast
+  { slug: "new-york", name: "New York", countryName: "United States", lat: 40.7128, lng: -74.0060, radiusKm: 20 },
+  { slug: "buffalo", name: "Buffalo", countryName: "United States", lat: 42.8864, lng: -78.8784, radiusKm: 20 },
+  { slug: "boston", name: "Boston", countryName: "United States", lat: 42.3601, lng: -71.0589, radiusKm: 20 },
+  { slug: "philadelphia", name: "Philadelphia", countryName: "United States", lat: 39.9526, lng: -75.1652, radiusKm: 20 },
+  { slug: "washington-dc", name: "Washington DC", countryName: "United States", lat: 38.9072, lng: -77.0369, radiusKm: 20 },
+  { slug: "baltimore", name: "Baltimore", countryName: "United States", lat: 39.2904, lng: -76.6122, radiusKm: 20 },
+  { slug: "newark", name: "Newark", countryName: "United States", lat: 40.7357, lng: -74.1724, radiusKm: 15 },
+
+  // United States — Midwest
+  { slug: "chicago", name: "Chicago", countryName: "United States", lat: 41.8781, lng: -87.6298, radiusKm: 25 },
+  { slug: "detroit", name: "Detroit", countryName: "United States", lat: 42.3314, lng: -83.0458, radiusKm: 20 },
+  { slug: "indianapolis", name: "Indianapolis", countryName: "United States", lat: 39.7684, lng: -86.1581, radiusKm: 20 },
+  { slug: "columbus", name: "Columbus", countryName: "United States", lat: 39.9612, lng: -82.9988, radiusKm: 20 },
+  { slug: "cleveland", name: "Cleveland", countryName: "United States", lat: 41.4993, lng: -81.6944, radiusKm: 20 },
+  { slug: "minneapolis", name: "Minneapolis", countryName: "United States", lat: 44.9778, lng: -93.2650, radiusKm: 20 },
+  { slug: "milwaukee", name: "Milwaukee", countryName: "United States", lat: 43.0389, lng: -87.9065, radiusKm: 20 },
+  { slug: "kansas-city", name: "Kansas City", countryName: "United States", lat: 39.0997, lng: -94.5786, radiusKm: 20 },
+  { slug: "st-louis", name: "St. Louis", countryName: "United States", lat: 38.6270, lng: -90.1994, radiusKm: 20 },
+  { slug: "omaha", name: "Omaha", countryName: "United States", lat: 41.2565, lng: -95.9345, radiusKm: 20 },
+
+  // United States — Pacific Northwest & Mountain
+  { slug: "seattle", name: "Seattle", countryName: "United States", lat: 47.6062, lng: -122.3321, radiusKm: 20 },
+  { slug: "portland", name: "Portland", countryName: "United States", lat: 45.5051, lng: -122.6750, radiusKm: 20 },
+  { slug: "denver", name: "Denver", countryName: "United States", lat: 39.7392, lng: -104.9903, radiusKm: 20 },
+  { slug: "phoenix", name: "Phoenix", countryName: "United States", lat: 33.4484, lng: -112.0740, radiusKm: 25 },
+  { slug: "tucson", name: "Tucson", countryName: "United States", lat: 32.2226, lng: -110.9747, radiusKm: 20 },
+  { slug: "las-vegas", name: "Las Vegas", countryName: "United States", lat: 36.1699, lng: -115.1398, radiusKm: 20 },
+  { slug: "salt-lake-city", name: "Salt Lake City", countryName: "United States", lat: 40.7608, lng: -111.8910, radiusKm: 20 },
+  { slug: "albuquerque", name: "Albuquerque", countryName: "United States", lat: 35.0844, lng: -106.6504, radiusKm: 20 },
+  { slug: "boise", name: "Boise", countryName: "United States", lat: 43.6150, lng: -116.2023, radiusKm: 20 },
+
+  // United States — Southeast
+  { slug: "atlanta", name: "Atlanta", countryName: "United States", lat: 33.7490, lng: -84.3880, radiusKm: 20 },
+  { slug: "charlotte", name: "Charlotte", countryName: "United States", lat: 35.2271, lng: -80.8431, radiusKm: 20 },
+  { slug: "raleigh", name: "Raleigh", countryName: "United States", lat: 35.7796, lng: -78.6382, radiusKm: 20 },
+  { slug: "nashville", name: "Nashville", countryName: "United States", lat: 36.1627, lng: -86.7816, radiusKm: 20 },
+  { slug: "memphis", name: "Memphis", countryName: "United States", lat: 35.1495, lng: -90.0490, radiusKm: 20 },
+  { slug: "new-orleans", name: "New Orleans", countryName: "United States", lat: 29.9511, lng: -90.0715, radiusKm: 20 },
+  { slug: "louisville", name: "Louisville", countryName: "United States", lat: 38.2527, lng: -85.7585, radiusKm: 20 },
+  { slug: "richmond", name: "Richmond", countryName: "United States", lat: 37.5407, lng: -77.4360, radiusKm: 20 },
+  { slug: "virginia-beach", name: "Virginia Beach", countryName: "United States", lat: 36.8529, lng: -75.9780, radiusKm: 20 },
 
   // United Kingdom
   { slug: "london", name: "London", countryName: "United Kingdom", lat: 51.5072, lng: -0.1276 },
@@ -155,14 +222,10 @@ function getCity(slug: string): City | undefined {
   return CITIES.find((c) => c.slug === slug);
 }
 
-// ─── FIX #1: generateStaticParams — tells Next.js to pre-build ALL city pages ──
-// Without this, dynamic routes may return 404 or not be crawlable by Google.
 export async function generateStaticParams() {
   return CITIES.map((c) => ({ slug: c.slug }));
 }
 
-// ─── FIX #2: generateMetadata — unique <title> + <meta> + canonical per city ──
-// Google needs a unique title/description to decide each page is worth indexing.
 export async function generateMetadata({
   params,
 }: {
@@ -179,20 +242,11 @@ export async function generateMetadata({
   return {
     title,
     description,
-    // FIX #3: canonical tag — prevents duplicate content issues
     alternates: { canonical },
-    openGraph: {
-      title,
-      description,
-      type: "website",
-      url: canonical,
-    },
-    // FIX #4: explicit robots directive — tells Google to index this page
+    openGraph: { title, description, type: "website", url: canonical },
     robots: { index: true, follow: true },
   };
 }
-
-// ─── Fetch Stations ───────────────────────────────────────────────────────────
 
 async function fetchStationsForCity(city: City): Promise<Station[]> {
   const radius = city.radiusKm ?? 20;
@@ -224,8 +278,6 @@ async function fetchStationsForCity(city: City): Promise<Station[]> {
     return [];
   }
 }
-
-// ─── JSON-LD Structured Data ──────────────────────────────────────────────────
 
 function CityJsonLd({ city, stations }: { city: City; stations: Station[] }) {
   const canonical = `https://www.evmapfinder.com/city/${city.slug}`;
@@ -306,8 +358,6 @@ function CityJsonLd({ city, stations }: { city: City; stations: Station[] }) {
   );
 }
 
-// ─── Page ─────────────────────────────────────────────────────────────────────
-
 export default async function CityPage({ params }: { params: { slug: string } }) {
   const city = getCity(params.slug);
   if (!city) notFound();
@@ -315,13 +365,9 @@ export default async function CityPage({ params }: { params: { slug: string } })
   const stations = await fetchStationsForCity(city);
   const radius = city.radiusKm ?? 20;
 
-  // FIX #5: Group nearby cities for internal linking
-  // Internal links between city pages help Google discover and index all pages.
   const nearbyCities = CITIES.filter(
-    (c) =>
-      c.slug !== city.slug &&
-      c.countryName === city.countryName
-  ).slice(0, 6);
+    (c) => c.slug !== city.slug && c.countryName === city.countryName
+  ).slice(0, 8);
 
   return (
     <>
@@ -330,20 +376,14 @@ export default async function CityPage({ params }: { params: { slug: string } })
       <main className="min-h-screen bg-slate-950 text-white">
         <div className="max-w-5xl mx-auto px-4 py-10">
 
-          {/* Breadcrumbs */}
           <nav aria-label="Breadcrumb" className="mb-6 text-sm text-slate-400">
             <ol className="flex items-center gap-2">
-              <li>
-                <Link href="/" className="hover:text-white transition-colors">
-                  Home
-                </Link>
-              </li>
+              <li><Link href="/" className="hover:text-white transition-colors">Home</Link></li>
               <li aria-hidden="true">›</li>
               <li className="text-slate-200">EV Charging in {city.name}</li>
             </ol>
           </nav>
 
-          {/* Header */}
           <header className="mb-6">
             <h1 className="text-3xl sm:text-4xl font-bold tracking-tight">
               EV Charging Stations in {city.name}
@@ -353,7 +393,6 @@ export default async function CityPage({ params }: { params: { slug: string } })
             </p>
           </header>
 
-          {/* Intro paragraph */}
           <section className="mb-8">
             <p className="text-slate-300 leading-relaxed">
               Looking for electric vehicle charging stations in{" "}
@@ -366,7 +405,6 @@ export default async function CityPage({ params }: { params: { slug: string } })
             </p>
           </section>
 
-          {/* Tip banner */}
           <section className="mb-8">
             <div className="bg-slate-900/60 border border-slate-800 rounded-xl p-4">
               <p className="text-slate-300">
@@ -374,22 +412,18 @@ export default async function CityPage({ params }: { params: { slug: string } })
                 <Link href="/" className="text-emerald-400 hover:text-emerald-300 underline">
                   &quot;Find near me&quot;
                 </Link>{" "}
-                button on the homepage for real-time sorting by your exact
-                current location.
+                button on the homepage for real-time sorting by your exact current location.
               </p>
             </div>
           </section>
 
-          {/* Station list */}
           <section className="mb-12">
             <h2 className="text-xl font-semibold mb-4">
               Nearby stations ({stations.length})
             </h2>
-
             {stations.length === 0 ? (
               <div className="bg-slate-900/60 border border-slate-800 rounded-xl p-4 text-slate-300">
-                No stations found for this area right now. Try another city or
-                use the homepage &quot;Find near me&quot;.
+                No stations found for this area right now. Try another city or use the homepage &quot;Find near me&quot;.
               </div>
             ) : (
               <ul className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
@@ -398,9 +432,7 @@ export default async function CityPage({ params }: { params: { slug: string } })
                     <h3 className="font-semibold">{s.name}</h3>
                     <p className="text-slate-400 text-sm">{s.address}</p>
                     <p className="text-slate-400 text-sm">
-                      {s.city}
-                      {s.city && s.country ? ", " : ""}
-                      {s.country}
+                      {s.city}{s.city && s.country ? ", " : ""}{s.country}
                     </p>
                     {typeof s.lat === "number" && typeof s.lng === "number" ? (
                       <a
@@ -418,57 +450,35 @@ export default async function CityPage({ params }: { params: { slug: string } })
             )}
           </section>
 
-          {/* FAQ section */}
           <section className="mb-12">
-            <h2 className="text-xl font-semibold mb-6">
-              Frequently Asked Questions
-            </h2>
+            <h2 className="text-xl font-semibold mb-6">Frequently Asked Questions</h2>
             <dl className="space-y-6">
               <div>
-                <dt className="font-medium text-white">
-                  How many EV charging stations are in {city.name}?
-                </dt>
+                <dt className="font-medium text-white">How many EV charging stations are in {city.name}?</dt>
                 <dd className="mt-1 text-slate-400 text-sm leading-relaxed">
-                  EVMapFinder currently lists {stations.length} charging stations
-                  within {radius}km of {city.name} city center, sourced from
-                  OpenChargeMap. Data is refreshed hourly.
+                  EVMapFinder currently lists {stations.length} charging stations within {radius}km of {city.name} city center, sourced from OpenChargeMap. Data is refreshed hourly.
                 </dd>
               </div>
               <div>
-                <dt className="font-medium text-white">
-                  How do I find EV charging stations near me in {city.name}?
-                </dt>
+                <dt className="font-medium text-white">How do I find EV charging stations near me in {city.name}?</dt>
                 <dd className="mt-1 text-slate-400 text-sm leading-relaxed">
                   Use the &quot;Find near me&quot; button on the{" "}
-                  <Link href="/" className="text-emerald-400 hover:text-emerald-300 underline">
-                    EVMapFinder homepage
-                  </Link>{" "}
-                  to auto-detect your location and sort results by distance in
-                  real time.
+                  <Link href="/" className="text-emerald-400 hover:text-emerald-300 underline">EVMapFinder homepage</Link>{" "}
+                  to auto-detect your location and sort results by distance in real time.
                 </dd>
               </div>
               <div>
-                <dt className="font-medium text-white">
-                  Are the EV charging stations in {city.name} free to use?
-                </dt>
+                <dt className="font-medium text-white">Are the EV charging stations in {city.name} free to use?</dt>
                 <dd className="mt-1 text-slate-400 text-sm leading-relaxed">
-                  Pricing varies by network and operator. Some stations in{" "}
-                  {city.name} offer free charging; others require a membership or
-                  per-kWh payment. Check the individual station or its operator&apos;s
-                  app for current pricing.
+                  Pricing varies by network and operator. Some stations in {city.name} offer free charging; others require a membership or per-kWh payment. Check the individual station or its operator&apos;s app for current pricing.
                 </dd>
               </div>
             </dl>
           </section>
 
-          {/* FIX #5: Internal links to other cities in same country
-              This is CRITICAL for Google to discover and index all city pages.
-              Without internal links, Google may ignore sitemap entries. */}
           {nearbyCities.length > 0 && (
             <section className="mb-12">
-              <h2 className="text-xl font-semibold mb-4">
-                More cities in {city.countryName}
-              </h2>
+              <h2 className="text-xl font-semibold mb-4">More cities in {city.countryName}</h2>
               <ul className="flex flex-wrap gap-3">
                 {nearbyCities.map((c) => (
                   <li key={c.slug}>
@@ -484,12 +494,8 @@ export default async function CityPage({ params }: { params: { slug: string } })
             </section>
           )}
 
-          {/* Footer */}
           <footer className="mt-4 text-sm text-slate-500">
-            <p>
-              Data source: OpenChargeMap (public endpoint). Results may vary by
-              availability. Last updated: hourly.
-            </p>
+            <p>Data source: OpenChargeMap (public endpoint). Results may vary by availability. Last updated: hourly.</p>
           </footer>
 
         </div>

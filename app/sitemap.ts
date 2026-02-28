@@ -7,9 +7,33 @@ const CITY_SLUGS = [
   "tel-aviv", "jerusalem", "haifa", "rishon-lezion", "petah-tikva",
   "beer-sheva", "netanya", "ashdod", "eilat",
 
-  // United States
-  "new-york", "los-angeles", "san-francisco", "san-diego", "seattle",
-  "austin", "chicago", "miami",
+  // United States — California
+  "los-angeles", "san-francisco", "san-diego", "san-jose", "sacramento",
+  "fresno", "long-beach", "oakland", "anaheim", "santa-ana",
+  "irvine", "palo-alto", "santa-monica", "pasadena", "berkeley",
+
+  // United States — Texas
+  "austin", "houston", "dallas", "san-antonio", "fort-worth",
+  "el-paso", "plano",
+
+  // United States — Florida
+  "miami", "orlando", "tampa", "jacksonville", "fort-lauderdale", "st-petersburg",
+
+  // United States — New York & Northeast
+  "new-york", "buffalo", "boston", "philadelphia", "washington-dc",
+  "baltimore", "newark",
+
+  // United States — Midwest
+  "chicago", "detroit", "indianapolis", "columbus", "cleveland",
+  "minneapolis", "milwaukee", "kansas-city", "st-louis", "omaha",
+
+  // United States — Pacific Northwest & Mountain
+  "seattle", "portland", "denver", "phoenix", "tucson",
+  "las-vegas", "salt-lake-city", "albuquerque", "boise",
+
+  // United States — Southeast
+  "atlanta", "charlotte", "raleigh", "nashville", "memphis",
+  "new-orleans", "louisville", "richmond", "virginia-beach",
 
   // United Kingdom
   "london", "manchester", "birmingham",
@@ -91,7 +115,7 @@ export default function sitemap(): MetadataRoute.Sitemap {
   const cityPages: MetadataRoute.Sitemap = CITY_SLUGS.map((slug) => ({
     url: `${SITE}/city/${slug}`,
     lastModified: new Date(),
-    changeFrequency: "daily",
+    changeFrequency: "weekly",
     priority: 0.8,
   }));
 
