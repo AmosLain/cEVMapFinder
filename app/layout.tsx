@@ -3,6 +3,7 @@ import "./globals.css";
 import CookieBanner from "./components/CookieBanner";
 import ConsentScripts from "./components/ConsentScripts";
 import PWARegister from "./components/PWARegister";
+import InstallBanner from "./components/InstallBanner";
 
 export const metadata: Metadata = {
   title: "EV Charging Stations Map — Find Chargers Near You | EVMapFinder",
@@ -111,6 +112,9 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
             </p>
           </div>
         </footer>
+
+        {/* PWA Install Banner */}
+        <InstallBanner />
 
         {/* קוקיז + טעינת סקריפטים אחרי אישור */}
         <CookieBanner />
